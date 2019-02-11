@@ -1,0 +1,24 @@
+/*
+    css-loader会识别这是一个本地文件，并将'./images/pg.png'路劲替换为输出目录中图像的最终路径；
+    另，html-loader 以相同的方式处理 <img src="./my-image.png" />。
+*/
+@font-face {
+    font-family: 'dingdong';
+    src: url('./font/dingdong.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+body {
+	background: url('./images/bg.png');
+}
+.hello {
+	font-size: 30px;
+	font-family: 'dingdong';
+    color: red;
+}
+.icon-emoji_fill {
+    margin-left: 10px;
+    font-size: 32px;
+    color: red;
+}
