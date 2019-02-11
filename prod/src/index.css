@@ -1,0 +1,20 @@
+body {
+	background-color: #f7f7f7;
+}
+.hello {
+	position: relative;
+	font-size: 30px;
+	font-family: 'dingdong';
+    color: red;
+    transform: rotate(-30deg);
+    animation: mymove 5s infinite alternate;
+}
+@keyframes mymove
+{
+	from {
+		left: 0;
+	}
+	to {
+		left: 200px;
+	}
+}
