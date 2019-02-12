@@ -1,1 +1,132 @@
 SplitChunksPlugin
+
+default（前提、预设条件）：
+webpack自动分割chunk依赖于下面几个条件：
+    1、 新的chunk可以共享，或者模块来自node_modules文件夹；
+    2、 新块要大于30kb(在min+gz之前)；
+    3、 当按需加载块时，并行请求的最大数量，小余或等于5；
+    4、 在初始页面加载时，并行请求的最大数量，小余或等于3；
+当试图满足最后两个条件时，更大的块可作为首选
+
+Configuration（配置）：
+为开发人员希望对这个功能有更多的控制，webpack提供了一组选项：
+（选择默认配置是为了适应web性能最佳实践，但是项目的最佳策略可能有所不同。如果您正在更改配置，您应该度量更改的影响，以确保确实有好处）
+
+1、 optimization.splitChunks，此配置对象表示SplitChunksPlugin的默认行为。
+module.exports = {
+  //...
+  optimization: {
+    splitChunks: {
+      chunks: 'async',
+      minSize: 30000,
+      maxSize: 0,
+      minChunks: 1,
+      maxAsyncRequests: 5,
+      maxInitialRequests: 3,
+      automaticNameDelimiter: '~',
+      name: true,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        },
+        default: {
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  }
+};
+
+2、 splitChunks.automaticNameDelimiter，默认情况下，webpack将使用块的起源和名称生成名称(例如vendor ~main.js)。此选项允许您为生成的名称指定要使用的分隔符。
+
+3、 splitChunks.chunks，这表示将选择哪些块进行优化。当提供字符串时，有效值为all、async和initial。提供all功能非常强大，因为这意味着块甚至可以在异步和非异步块之间共享。
+	module.exports = {
+	  //...
+	  optimization: {
+	    splitChunks: {
+	      // include all types of chunks
+	      chunks: 'all'
+	    }
+	  }
+	};
+
+或者，您可以提供用于更多控制的函数。返回值将指示是否包含每个块。
+module.exports = {
+  //...
+  optimization: {
+    splitChunks: {
+      chunks (chunk) {
+        // exclude `my-excluded-chunk`
+        return chunk.name !== 'my-excluded-chunk';
+      }
+    }
+  }
+};
+（您可以将此配置与HtmlWebpackPlugin结合使用。它将为您注入所有生成的vendor chunks。）
+
+4、 splitChunks.maxAsyncRequests，按需加载时并行请求的最大数量。
+
+5、 splitChunks.maxInitialRequests，入口点上并行请求的最小数目。
+
+6、 splitChunks.minChunks，在分割之前必须共享一个模块的最小chunk数。
+
+7、 splitChunks.minSize，生成chunk的最小大小(以字节为单位)。
+
+8、 splitChunks.maxSize，使用 maxSize让webpack尝试将大于maxSize的chunk分割成更小的部分，分割的部分尺寸至少是minSize。这个方法是确定性的，对模块的更改只会产生局部影响。以便在使用长期缓存时可以使用，并且不需要记录。
+maxSize is only a hint（提示、按时） and could be violated（违反；侵犯，妨碍；亵渎） when modules are bigger than maxSize or splitting would violate minSize.
+
+9、 splitChunks.name，分割块的名称。 当值为true时，将自动生成基于块和缓存组键的名称。提供字符串或函数允许您使用自定义名称。指定总是返回相同字符串的字符串或函数，将把所有公共模块和vendors合并到单个块中。这可能会导致更大的初始下载和更慢的页面加载。(如果splitChunks.name匹配入口点名称，则入口点将被删除。？？？)
+建议在生产构建中将splitchunk .name设置为false，这样就不会不必要地更改名称。
+
+10、 splitChunks.cacheGroups，Cache groups可以继承和/或覆盖splitchunk中的任何选项。但是test、priority和reuseExistingChunk只能在cacheGroups上配置。若要禁用任何默认的cache groups，请将其设置为false。
+module.exports = {
+  //...
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        default: false
+      }
+    }
+  }
+};
+
+10-1、 splitChunks.cacheGroups.priority，一个模块可以属于多个cache Groups。优化将首选优先级更高的缓存组。默认组的优先级为负，允许自定义组具有更高的优先级(自定义组的默认值为0)。
+
+10-2、splitChunks.cacheGroups.{cacheGroup}.reuseExistingChunk，如果current chunk包含的modules已经从main bundle中分离出来的模块，那么它将被重用，而不是生成一个新的模块。这可能会影响块的文件名。
+
+10-3、 splitChunks.cacheGroups.{cacheGroup}.test，控制cacheGroups选择哪些模块。省略它则会选择所有模块。它可以匹配绝对模块资源路径或chunk names。当chunk name匹配时，将选择此chunk中的所有模块。
+
+10-4、 splitChunks.cacheGroups.{cacheGroup}.filename，当且仅当initial chunk为初始块时，允许覆盖文件名。并且output.filename中所有可用的占位符，都可以使用。
+module.exports = {
+  //...
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendors: {
+          filename: '[name].bundle.js'
+        }
+      }
+    }
+  }
+};
+
+
+Examples（实例）
+Defaults: Example 1
+// index.js
+import('./a'); // dynamic import
+
+// a.js
+import 'react';
+
+结果:将创建一个包含react的单独块。在导入调用中，此块与包含./a的原始块并行加载。
+原因:
+条件1:块包含来自node_modules的模块
+条件2:react大于30kb
+条件3:导入调用的并行请求数为2
+条件4:初始页面加载时不影响请求
+
+这背后的原因是什么?react可能不会像应用程序代码那样频繁更改。通过将它移动到一个单独的块中，这个块可以与应用程序代码单独缓存(假设您使用chunkhash、records、Cache-Control或其他长期缓存方法)。
