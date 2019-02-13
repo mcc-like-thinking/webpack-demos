@@ -3,6 +3,9 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin'); // 会默认生成 index.html 文件， 所有的 bundle 会自动添加到 此html 中
 const CleanWebpackPlugin = require('clean-webpack-plugin'); // 每次构建前清理 /dist文件夹
 
+//const Visualizer = require('webpack-visualizer-plugin'); // 输出结果分析插件
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 module.exports = {
 	// 多入口
 	entry: {
@@ -19,12 +22,12 @@ module.exports = {
 	},
 	optimization: {
 		splitChunks: {
-			// chunks: 'async',
-		 //    minSize: 30000,
-		 //    minChunks: 2,
-		 //    maxAsyncRequests: 5, // 按需加载时并行请求的最大数量
-		 //    maxInitialRequests: 3, // 入口点上并行请求的最大数量
-		 //    name: false, // 是否自动生成基于chunks和缓存组键的名称
+			chunks: 'async',
+		    minSize: 30000,
+		    minChunks: 2,
+		    maxAsyncRequests: 5, // 按需加载时并行请求的最大数量
+		    maxInitialRequests: 3, // 入口点上并行请求的最大数量
+		    name: false, // 是否自动生成基于chunks和缓存组键的名称
 		    cacheGroups: { // 缓存组
 		        vendor: {
 		            name: 'vendor',
@@ -33,6 +36,7 @@ module.exports = {
 		            reuseExistingChunk: false,
 		            //test: /node_modules\/(.*)\.js/
 		            test: /[\\/]node_modules[\\/]/
+		            //test: /[\\/]node_modules[\\/](lodash)[\\/]/,
 		        }
 		    }
 		}
@@ -44,6 +48,11 @@ module.exports = {
 	    }),
 	    // new webpack.optimize.CommonsChunkPlugin({ // webpack中被移除
 	    // 	name: 'common' // 指定公共bundle名称
-	    // })
+	    // }),
+
+	    // new Visualizer({
+	    // 	filename: './statistics.html'
+        // }),
+        new BundleAnalyzerPlugin()
 	]
 };

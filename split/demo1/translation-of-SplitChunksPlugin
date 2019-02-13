@@ -75,8 +75,8 @@ module.exports = {
 
 7、 splitChunks.minSize，生成chunk的最小大小(以字节为单位)。
 
-8、 splitChunks.maxSize，使用 maxSize让webpack尝试将大于maxSize的chunk分割成更小的部分，分割的部分尺寸至少是minSize。这个方法是确定性的，对模块的更改只会产生局部影响。以便在使用长期缓存时可以使用，并且不需要记录。
-maxSize is only a hint（提示、按时） and could be violated（违反；侵犯，妨碍；亵渎） when modules are bigger than maxSize or splitting would violate minSize.
+8、 splitChunks.maxSize，使用 maxSize让webpack尝试将大于maxSize的chunk分割成更小的部分，分割成的部分的尺寸至少是minSize。这个方法是确定性的，对模块的更改只会产生局部影响。以便在使用长期缓存时可以使用，并且不需要记录。
+maxSize is only a hint（提示、暗示） and could be violated（违反；侵犯，妨碍；亵渎） when modules are bigger than maxSize or splitting would violate minSize.
 
 9、 splitChunks.name，分割块的名称。 当值为true时，将自动生成基于块和缓存组键的名称。提供字符串或函数允许您使用自定义名称。指定总是返回相同字符串的字符串或函数，将把所有公共模块和vendors合并到单个块中。这可能会导致更大的初始下载和更慢的页面加载。(如果splitChunks.name匹配入口点名称，则入口点将被删除。？？？)
 建议在生产构建中将splitchunk .name设置为false，这样就不会不必要地更改名称。
@@ -95,7 +95,7 @@ module.exports = {
 
 10-1、 splitChunks.cacheGroups.priority，一个模块可以属于多个cache Groups。优化将首选优先级更高的缓存组。默认组的优先级为负，允许自定义组具有更高的优先级(自定义组的默认值为0)。
 
-10-2、splitChunks.cacheGroups.{cacheGroup}.reuseExistingChunk，如果current chunk包含的modules已经从main bundle中分离出来的模块，那么它将被重用，而不是生成一个新的模块。这可能会影响块的文件名。
+10-2、splitChunks.cacheGroups.{cacheGroup}.reuseExistingChunk，如果current chunk包含的modules已经从main bundle中分离出来，那么它将被重用，而不是生成一个新的模块。这可能会影响块的文件名。
 
 10-3、 splitChunks.cacheGroups.{cacheGroup}.test，控制cacheGroups选择哪些模块。省略它则会选择所有模块。它可以匹配绝对模块资源路径或chunk names。当chunk name匹配时，将选择此chunk中的所有模块。
 
@@ -122,7 +122,7 @@ import('./a'); // dynamic import
 // a.js
 import 'react';
 
-结果:将创建一个包含react的单独块。在导入调用中，此块与包含./a的原始块并行加载。
+结果:将创建一个包含react的单独块。在导入调用中，此块与包含./a的原始块（original chunk）并行加载。
 原因:
 条件1:块包含来自node_modules的模块
 条件2:react大于30kb
@@ -130,3 +130,80 @@ import 'react';
 条件4:初始页面加载时不影响请求
 
 这背后的原因是什么?react可能不会像应用程序代码那样频繁更改。通过将它移动到一个单独的块中，这个块可以与应用程序代码单独缓存(假设您使用chunkhash、records、Cache-Control或其他长期缓存方法)。
+
+
+Defaults: Example 2
+// entry.js
+// dynamic imports
+import('./a');
+import('./b');
+
+// a.js
+import './helpers'; // helpers is 40kb in size
+
+// b.js
+import './helpers';
+import './more-helpers'; // more-helpers is also 40kb in size
+
+结果:将创建一个单独的块，其中包含./helper及其所有依赖项。在导入调用中，此块与原始块（original chunk）并行加载。
+原因:
+条件1:块在两个导入调用之间共享
+条件2:helper文件大于30kb
+条件3:导入调用的并行请求数为2
+条件4:初始页面加载时不影响请求
+
+将helpers放入每个块中会导致其代码被下载两次。通过使用分割块，这只会发生一次下载。我们支付额外请求的成本，这可以被认为是一种折衷。这就是为什么最小大小为30kb。
+
+
+Split Chunks: Example 1
+创建一个 commons chunk，其中包括入口点（entry points）之间共享的所有代码。
+module.exports = {
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: 'commons',
+          chunks: 'initial',
+          minChunks: 2
+        }
+      }
+    }
+  }
+};
+（此配置会放大初始包（nitial bundles），建议在不立即需要模块时使用动态导入。）
+
+
+Split Chunks: Example 2
+创建一个 vendors chunk，其中包含整个应用程序中来自node_modules的所有代码。
+module.exports = {
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
+    }
+  }
+};
+（这可能会生成一个包含所有外部包的大块。建议只包含核心框架和实用程序，并动态加载其余依赖项。）
+
+
+Split Chunks: Example 3
+创建一个定制的供应商块，其中包含由RegExp（正则表达式）匹配的某些node_modules包。
+module.exports = {
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+          name: 'vendor',
+          chunks: 'all',
+        }
+      }
+    }
+  }
+};
+（这会将react和response-dom分割成一个单独的块。如果您不确定一个块中包含了哪些包，您可以参考Bundle Analysis一节了解详细信息。）
