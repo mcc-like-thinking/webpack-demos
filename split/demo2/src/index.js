@@ -9,7 +9,7 @@
 // }
 
 // document.body.appendChild(component());
-
+import 'babel-polyfill'
 
 //不再使用静态导入 lodash，而是通过使用动态导入来分离一个 chunk：
 function getComponent() {

@@ -6,9 +6,10 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
 	// 多入口
-	entry: {
-		app: './src/index.js'
-	},
+	entry: [
+	    'babel-polyfill',
+		path.resolve(__dirname, "src/index.js")
+	],
 	output: {
 		filename: '[name].bundle.js', // 根据入口起点名称动态生成bundle名称
 		path: path.resolve(__dirname, 'dist')
@@ -24,7 +25,7 @@ module.exports = {
 				//更为推荐的方式是在.bablerc文件中配置以下设置
 				options: {
 					presets: ['@babel/preset-env'],
-					plugins: ['@babel/plugin-transform-runtime']
+					plugins: ['@babel/plugin-transform-runtime','@babel/plugin-syntax-dynamic-import']
 				}
 			},
 			{

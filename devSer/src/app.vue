@@ -1,26 +1,18 @@
 <template>
-	<div>vue文件</div>
+	<div>
+	    <div>
+	    	<router-link :to="{ name: 'home' }">Go to Home</router-link>
+            <router-link :to="{ name: 'my' }">Go to Bar</router-link>
+	    </div>
+	    <router-view></router-view>
+	</div>
 </template>
 
 <script>
-	import Axios from 'axios'
 	export default {
 		data() {
 			return {
 
-			}
-		},
-		created() {
-			console.log(123)
-			this.getData()
-		},
-		methods: {
-			getData(){
-				Axios.get('http://www.yideschool.com/mhh/data.json')
-				.then(function (response) {
-				    console.log(response)
-				})
-				.catch(function (error) {})
 			}
 		}
 	}
