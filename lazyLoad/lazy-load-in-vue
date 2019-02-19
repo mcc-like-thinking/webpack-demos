@@ -1,0 +1,48 @@
+Lazy Loading in Vue using Webpack's Code Splitting
+
+可以在Vue应用的3个不同的level中应用【延迟加载】和【代码分割】:
+a、 组件，尤其是异步组件
+b、 路由（Router）
+c、 vuex
+
+1、 Lazy load in Vue components（组件中的延迟加载）
+在注册组件时，只需使用import函数即可:
+Vue.component("AsyncCmp", () => import("./AsyncCmp"));
+
+本地注册：
+new Vue({
+  components: {
+    AsyncCmp: () => import("./AsyncCmp")
+  }
+});
+
+通过将导入函数包装成一个箭头函数，Vue将在模块被请求时执行它，与此同时加载该模块。
+
+如果导入的组件使用命名导出（named export），则可以对返回的Promise使用对象析构:
+components: {
+  UiAlert: () => import('keen-ui').then(({ UiAlert }) => UiAlert)
+}
+
+
+2、 Lazy load in Vue router（Vue路由器中的延迟加载）
+Vue路由器内置了对延迟加载的支持。这与使用import函数导入组件一样简单。例如我们想在/Login路由中延迟加载登录组件:
+// Instead of: import Login from './login'
+const Login = () => import("./login");
+
+new VueRouter({
+  routes: [{ path: "/login", component: Login }]
+});
+
+
+3、 Lazy load a Vuex module （vuex中的延迟加载）
+Vuex有一个registerModule方法，允许我们动态创建Vuex模块。如果我们考虑导入函数(import function)以ES模块(ES Module)作为负载返回一个promise，我们可以使用它来延迟加载一个模块:
+const store = new Vuex.Store()
+
+// Assume there is a "login" module we wanna load
+import('./store/login').then(loginModule => {
+  store.registerModule('login', loginModule)
+})
+
+
+4、 总结
+通过使用Vue和Webpack，延迟加载变得很非常简单。通过以上内容，你可以使用不同的方法将你的应用程序分割成块（chunks），并在需要时加载它们，从而减轻应用程序的初始负载。
