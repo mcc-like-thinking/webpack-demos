@@ -46,7 +46,7 @@ module.exports = {
 	    new HtmlWebpackPlugin({
 	    	title: 'Code Splitting'
 	    }),
-	    // new webpack.optimize.CommonsChunkPlugin({ // webpack中被移除
+	    // new webpack.optimize.CommonsChunkPlugin({ // webpack4中被移除
 	    // 	name: 'common' // 指定公共bundle名称
 	    // }),
 
