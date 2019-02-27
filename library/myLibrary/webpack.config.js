@@ -2,20 +2,23 @@ const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const webpack = require('webpack'); // webpack内置插件
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-
 module.exports = {
 	entry: './src/index.js',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
-		filename: 'webpack-numbers.js',
-		library: 'webpackNumbers', // library bundle 暴露为名为 webpackNumbers 的全局变量
-		libraryTarget: 'umd' // 让 library 和其他环境兼容
+		filename: 'webpack-numbers.js', // //打包之后生成的文件名，可以随意写
+		library: 'webpackNumbers', // library bundle 暴露为名为 webpackNumbers 的全局变量(类库名)
+		//libraryExport: "default", // 对外暴露default属性，就可以直接调用default里的属性
+		globalObject: 'this', // 定义全局变量,兼容node和浏览器运行，避免出现"window is not defined"的情况
+		libraryTarget: 'umd' // (指定library兼容的环境)定义打包方式Universal Module Definition,同时支持在CommonJS、AMD和全局变量使用
 	},
-	externals: { // 不打包 lodash，而是使用 externals 来 require 用户加载好的 lodash
-		lodash: { // 意味着library需要一个名为lodash的依赖，这个依赖在用户环境中必须存在且可用
+	externals: { // 从输出的bundle中排除依赖，不打包 lodash，而是使用 externals 来 require 用户加载好的 lodash
+		'lodash': { // 意味着library需要一个名为lodash的依赖，这个依赖在用户环境中必须存在且可用
+			// 可以在各模块系统(Commonjs/Commonjs2/AMD)中通过'lodash'访问，但在全局变量形式下用'_'访问
 			commonjs: 'lodash',
 			commonjs2: 'lodash',
 			amd: 'lodash',
@@ -25,6 +28,16 @@ module.exports = {
 	devtool: 'source-map', // 在生产环境中使用source-map，有利于调试源码和运行基准测试
 	module: {
 		rules: [{
+			test: /\.js$/,
+			loader: 'babel-loader',
+			exclude: /node_modules/,
+
+			//更为推荐的方式是在.bablerc文件中配置以下设置
+			options: {
+				presets: ['@babel/preset-env'],
+				plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-syntax-dynamic-import']
+			}
+		}, {
 			test: /\.css$/,
 			use: [
 				MiniCssExtractPlugin.loader,
@@ -72,6 +85,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: 'Production'
 		}),
+		// new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
+		// 	_: ['lodash']
+		// }),
 		new MiniCssExtractPlugin({
 			filename: 'css/app.[name].css',
 			chunkFilename: 'css/app.[contenthash:12].css' // use contenthash *
