@@ -17,7 +17,7 @@ module.exports = {
 		libraryTarget: 'umd' // (指定library兼容的环境)定义打包方式Universal Module Definition,同时支持在CommonJS、AMD和全局变量使用
 	},
 	externals: { // 从输出的bundle中排除依赖，不打包 lodash，而是使用 externals 来 require 用户加载好的 lodash
-		'lodash': { // 意味着library需要一个名为lodash的依赖，这个依赖在用户环境中必须存在且可用
+		lodash: { // 意味着library需要一个名为lodash的依赖，这个依赖在用户环境中必须存在且可用
 			// 可以在各模块系统(Commonjs/Commonjs2/AMD)中通过'lodash'访问，但在全局变量形式下用'_'访问
 			commonjs: 'lodash',
 			commonjs2: 'lodash',
@@ -85,9 +85,9 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: 'Production'
 		}),
-		// new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
-		// 	_: ['lodash']
-		// }),
+		new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
+			_: ['lodash']
+		}),
 		new MiniCssExtractPlugin({
 			filename: 'css/app.[name].css',
 			chunkFilename: 'css/app.[contenthash:12].css' // use contenthash *
