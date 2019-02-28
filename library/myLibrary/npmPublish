@@ -1,0 +1,26 @@
+https://www.npmjs.com/
+
+username: menghh
+
+几个主要命令：
+npm adduser //注册并登陆
+
+npm login  //输入注册时候的账户、密码、邮箱，来登陆
+
+npm version <update_type>  //更新
+
+npm publish //发布
+
+
+网络资料：
+更新
+1、需要先更新版本号，npm version <update_type>
+2、之后webpack构建npm run build
+3、上传npm publish
+
+需要更新版本编号，可以直接手动在package.json中更改version字段。
+也可以使用命令： npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
+
+patch: 补丁发布，向后兼容的bug修复，增加第三个数字。1.0.1
+minor: 轻微发布，向后兼容的新特性，将中间数字增加并将最后一位数重置为0。1.1.0
+major: 重大发布，破坏向下兼容的变化，将第一个数字增加，并将后两位数重置为0。2.0.0

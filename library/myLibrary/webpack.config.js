@@ -7,7 +7,10 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 module.exports = {
-	entry: './src/index.js',
+	// mode: "development || "production",
+	mode: 'development',
+	
+	/*entry: './src/index.js', 
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 		filename: 'webpack-numbers.js', // //打包之后生成的文件名，可以随意写
@@ -15,6 +18,19 @@ module.exports = {
 		//libraryExport: "default", // 对外暴露default属性，就可以直接调用default里的属性
 		globalObject: 'this', // 定义全局变量,兼容node和浏览器运行，避免出现"window is not defined"的情况
 		libraryTarget: 'umd' // (指定library兼容的环境)定义打包方式Universal Module Definition,同时支持在CommonJS、AMD和全局变量使用
+	}, */
+
+	entry: {
+		main: "./src/index.js",
+		app: "./src/app.js",
+		style: './src/style.css'
+	},
+	output: {
+		path: path.join(__dirname, "dist"),
+		filename: "library.[name].js",
+		library: ["library", "[name]"],
+		libraryTarget: "umd",
+		globalObject: 'this'
 	},
 	externals: { // 从输出的bundle中排除依赖，不打包 lodash，而是使用 externals 来 require 用户加载好的 lodash
 		lodash: { // 意味着library需要一个名为lodash的依赖，这个依赖在用户环境中必须存在且可用
@@ -85,12 +101,12 @@ module.exports = {
 		new HtmlWebpackPlugin({
 			title: 'Production'
 		}),
-		new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
-			_: ['lodash']
-		}),
+		// new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
+		// 	_: ['lodash']
+		// }),
 		new MiniCssExtractPlugin({
-			filename: 'css/app.[name].css',
-			chunkFilename: 'css/app.[contenthash:12].css' // use contenthash *
+			filename: 'css/[name].css',
+			chunkFilename: 'css/[name].css' // use contenthash *
 		})
 	]
 };

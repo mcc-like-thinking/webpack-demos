@@ -1,9 +1,11 @@
 // new webpack.ProvidePlugin({ // ProvidePlugin 可以将模块作为一个变量，被webpack在其他每个模块中引用。只有你需要使用此变量的时候，这个模块才会被 require 进来
 // 			_: ['lodash']
 // })
-//import _ from 'lodash'; // 通过ProvidePlugin插件，由webpack去动态加载此依赖，此加载可去掉
+import _ from 'lodash'; // 通过ProvidePlugin插件，由webpack去动态加载此依赖，此加载可去掉
 
 import numRef from './ref.json';
+
+//import './style.css' // 此导入，编译后不能获得library
 
 /*
 	output: {
