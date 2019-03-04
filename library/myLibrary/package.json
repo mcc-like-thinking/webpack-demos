@@ -1,8 +1,9 @@
 {
   "name": "first-library-of-mcc",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "",
   "main": "dist/library.main.js",
+  "files": ["dist"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js"
