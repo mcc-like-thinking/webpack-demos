@@ -23,6 +23,21 @@
 				    console.log(response)
 				    vm.msg = response.data.msg
 				}).catch(function (error) {})
+
+				// Axios.get('api/data.json').then(function (response) {
+				//     console.log(response)
+				//     vm.msg = response.data.msg
+				// }).catch(function (error) {})
+
+				Axios({
+				  method: 'post',
+				  url: '/test/recode/pageSelect',
+				  headers: {'Cookie': 'JSESSIONID=143F4B934D986C6557612E4DF5C9F67E'},
+				  params: {
+				    page: 1,
+				    rows: 10
+				  }
+				});
 			}
 		}
 	}

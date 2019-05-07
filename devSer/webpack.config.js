@@ -43,6 +43,14 @@ module.exports = {
                 changeOrigin: true, //把当前本地express服务器由A变为向B请求并返回( changes the origin of the host header to the target URL)
                 target: 'http://www.yideschool.com/mhh', //B
                 pathRewrite: { "^/api" : "" }
+            },
+            '/test': {
+                target: 'http://139.159.142.225:10095', // 请求的接口域名或IP地址，开头是http或https
+                // secure: false,  // 如果是https接口，需要配置这个参数
+                changeOrigin: true, // 是否跨域，如果接口跨域，需要进行这个参数配置
+                pathRewrite: {
+                    '^/test': '' //表示需要rewrite重写路径
+                }
             }
         }
 	},
